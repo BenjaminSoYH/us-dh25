@@ -75,17 +75,31 @@ export const ZNewAnswer = ZAnswer.pick({ question_id: true, content: true }).ext
 export const ZJournal = z.object({
     id: z.string().uuid(),
     user_id: z.string().uuid(),
+    title: z.string().optional().nullable(),
     content: z.string().min(1),
     ai_summary: z.string().optional().nullable(),
     visibility: z.enum(["private", "partner"]),
-    created_at: z.string()
+    created_at: z.string(),
+    updated_at: z.string()
 });
 export type Journal = z.infer<typeof ZJournal>;
 
 export const ZNewJournal = z.object({
+    title: z.string().optional().nullable(),
     content: z.string().min(1),
     visibility: z.enum(["private", "partner"]).default("private")
 });
+
+// Journal summaries (append-only)
+export const ZJournalSummary = z.object({
+    id: z.string().uuid(),
+    journal_id: z.string().uuid(),
+    generated_by: z.string().uuid().optional().nullable(),
+    summary: z.string().min(1),
+    model: z.string().optional().nullable(),
+    created_at: z.string()
+});
+export type JournalSummary = z.infer<typeof ZJournalSummary>;
 
 // Final stitched post for a photo prompt
 export const ZPost = z.object({

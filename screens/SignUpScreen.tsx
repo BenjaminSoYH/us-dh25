@@ -1,27 +1,64 @@
-import React, {useState} from 'react'
-import {Alert, Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import React, { useState } from 'react'
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import LoginInput from "../components/LoginInput";
 import ButtonComponent from "../components/ButtonComponent";
-import {ArrowLeftIcon} from "react-native-heroicons/solid";
-import {useNavigation} from "@react-navigation/native";
+import { ArrowLeftIcon } from "react-native-heroicons/solid";
+import { useNavigation } from "@react-navigation/native";
+import { supabase } from '../lib/supabase'
+import { upsertProfile } from '../lib/db'
 
 const SignUpScreen = () => {
     const navigation = useNavigation<any>();
     const[name, setName] = useState('');
-    const[email, setEmail] = useState('');
-    const[password, setPassword] = useState('');
-    const[confirm, setConfirm] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirm, setConfirm] = useState('');
+    const [loading, setLoading] = useState(false);
 
 
-    const handleSubmit = () => {
+    async function signInWithEmail() {
+        setLoading(true)
+        const { error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        })
+
+        if (!error) {
+            try {
+                const user = (await supabase.auth.getUser()).data.user
+                await upsertProfile({ handle: user?.id })
+            } catch { }
+        } else {
+            Alert.alert(error.message)
+        }
+        setLoading(false)
+    }
+
+    async function signUpWithEmail() {
+        setLoading(true)
+        const {
+            data: { session },
+            error,
+        } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        })
+
+        if (!error && session) {
+            try {
+                const user = (await supabase.auth.getUser()).data.user
+                await upsertProfile({ handle: user?.id })
+            } catch { }
+        }
+        if (error) Alert.alert(error.message)
+        if (!session) Alert.alert('Please check your inbox for email verification!')
+        setLoading(false)
+    }
+
+    const handleSubmit = async () => {
+        if (loading) return;
         if (!validate()) return;  // Added: Call validate and exit if it fails
-
-        // If email already exist in the database, don't let them create a new account
-
-        // If validation passes, proceed with login
-        Alert.alert('Success', 'Login successful!');
-
-        // navigation.navigate('Home'); // Navigate to home or next screen
+        await signUpWithEmail();
     };
 
     const validate = () => {
@@ -44,29 +81,30 @@ const SignUpScreen = () => {
             Alert.alert('Passwords do not match', 'Please confirm your password.');
             return false;
         }
+        return true;
     }
 
     return (
         <View style={styles.screen}>
             <View style={styles.content}>
-                <View style={{display:"flex", flexDirection:"column", alignItems:"center", gap: 5}}>
+                <View style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
                     <Image
-                        style={{width: 150, height: 150}}
+                        style={{ width: 150, height: 150 }}
                         source={require('../assets/BloomLogo.png')}
                         resizeMode="contain"
                     />
-                    <Text style={{fontWeight:"bold", fontSize: 30}}>Sign up</Text>
+                    <Text style={{ fontWeight: "bold", fontSize: 30 }}>Sign up</Text>
                 </View>
-                <View style={{width: "100%", display:"flex", flexDirection:"column", gap: 10}}>
+                <View style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
                     <LoginInput placeHolder={"Enter your name"} onChange={(name:string) => {setName(name)}}  />
-                    <LoginInput placeHolder={"Enter your email"} onChange={(email:string) => {setEmail(email)}}  />
-                    <LoginInput placeHolder={"Enter your password"} onChange={(password:string) => {setPassword(password)}}/>
-                    <LoginInput placeHolder={"Confirm your password"} onChange={(confirm:string) => {setConfirm(confirm)}}/>
+                    <LoginInput placeHolder={"Enter your email"} onChange={(email: string) => { setEmail(email) }} />
+                    <LoginInput placeHolder={"Enter your password"} onChange={(password: string) => { setPassword(password) }} />
+                    <LoginInput placeHolder={"Confirm your password"} onChange={(confirm: string) => { setConfirm(confirm) }} />
                 </View>
 
-                <ButtonComponent title={"Sign up"} mainColor="FF8781" textColor="FFFFFF" onPress={() => {handleSubmit()}}/>
-                <View style={{width:"100%", display:"flex", flexDirection:"row", justifyContent:"flex-end"}}>
-                    <TouchableOpacity style={{display:"flex", flexDirection:"row", gap: 10, alignItems:"center"}} onPress={() => {navigation.navigate('SplashScreen')}}>
+                <ButtonComponent title={"Sign up"} mainColor="FF8781" textColor="FFFFFF" onPress={() => { handleSubmit() }} />
+                <View style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "flex-end" }}>
+                    <TouchableOpacity style={{ display: "flex", flexDirection: "row", gap: 10, alignItems: "center" }} onPress={() => { navigation.navigate('SplashScreen') }}>
                         <ArrowLeftIcon></ArrowLeftIcon>
                         <Text>Back</Text>
                     </TouchableOpacity>

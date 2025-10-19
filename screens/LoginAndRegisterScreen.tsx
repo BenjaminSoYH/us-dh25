@@ -69,7 +69,7 @@ export default function SignInScreen() {
       >
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.header}>
-            <Text style={styles.appName}>Us</Text>
+            <Text style={styles.appName}>Bloom</Text>
             <Text style={styles.tagline}>Grow together, one day at a time.</Text>
           </View>
 

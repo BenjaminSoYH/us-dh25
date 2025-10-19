@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, Animated } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import ProgressBar from "../components/ProgressBar";
+import Navbar from "../components/Navbar";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MainScreen'>;
 
@@ -39,7 +40,6 @@ export default function MainScreen({ route }: Props) {
     const xp = 50;
     const stageIndex = getTulipStage(xp) - 1;
 
-    // 🌸 fade-in animation setup
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -73,6 +73,7 @@ export default function MainScreen({ route }: Props) {
                     </View>
                 </View>
             </View>
+            <Navbar disabled />
         </View>
     );
 }
@@ -82,6 +83,9 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 30,
         backgroundColor: 'white',
+        paddingBottom: 90,
+        alignItems: "center", // Centers everything
+        backgroundColor: 'white'
     },
 
     content: {

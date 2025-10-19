@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { listMyJournals, newJournal, updateJournal, summarizeJournal, listJournalSummaries } from '../lib/db';
+import Navbar from '../components/Navbar';
 
 type Journal = {
   id: string;
@@ -118,7 +119,7 @@ export default function JournalScreen() {
 
   if (mode === 'list') {
     return (
-      <View style={{ flex: 1, padding: 16 }}>
+      <View style={{ flex: 1, padding: 16, paddingBottom: 90 }}>
         {header}
         <Text style={styles.notice}>
           Your entries can be optionally summarized and shared with your partner to help them understand you better.
@@ -139,13 +140,14 @@ export default function JournalScreen() {
           )}
           ListEmptyComponent={<Text style={styles.empty}>No entries yet. Tap New to start.</Text>}
         />
+        <Navbar />
       </View>
     )
   }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.select({ ios: 'padding', android: undefined })}>
-      <View style={{ flex: 1, padding: 16 }}>
+      <View style={{ flex: 1, padding: 16, paddingBottom: 90 }}>
         {header}
         <View style={styles.editRow}>
           <TextInput
@@ -201,6 +203,7 @@ export default function JournalScreen() {
           </View>
         )}
       </View>
+      <Navbar />
     </KeyboardAvoidingView>
   )
 }

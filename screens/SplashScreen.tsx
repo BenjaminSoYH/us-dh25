@@ -1,13 +1,18 @@
 import React from 'react'
 import {StyleSheet, View, Image, Text} from "react-native";
 import ButtonComponent from "../components/ButtonComponent";
+import {useNavigation} from "@react-navigation/native";
 
 
 const SplashScreen = () => {
+    const navigation = useNavigation<any>();
+
     const signInPress = () => {
+        navigation.navigate('LoginScreen');
 
     };
     const signUpPress = () => {
+        navigation.navigate('SignUpScreen');
 
     };
 
@@ -31,8 +36,8 @@ const SplashScreen = () => {
                 </View>
 
                 <View style={styles.buttons}>
-                    <ButtonComponent title="Sign in" mainColor="FFFFFF" textColor="000000" />
-                    <ButtonComponent title="Get started" mainColor="FF8781" textColor="FFFFFF" />
+                    <ButtonComponent title="Sign in" mainColor="FFFFFF" textColor="000000" onPress={signInPress}/>
+                    <ButtonComponent title="Get started" mainColor="FF8781" textColor="FFFFFF" onPress={signUpPress} />
                 </View>
             </View>
         </View>
@@ -43,9 +48,10 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         paddingVertical: 100,
-        paddingHorizontal: 20,
+        paddingHorizontal: 30,
         alignItems: "center",
-        justifyContent: "center"  // Centers everything
+        justifyContent: "center", // Centers everything
+        backgroundColor: "white"
     },
     content: {
         width: "100%",

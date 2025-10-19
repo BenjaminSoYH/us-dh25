@@ -1,19 +1,12 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import HomeScreen from './screens/HomeScreen';
-import DetailsScreen from './screens/JournalScreen';
-
-const Stack = createNativeStackNavigator();
+import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Details" component={DetailsScreen} />
-      </Stack.Navigator>
+      {/* AppNavigator should contain your tab/stack setup (e.g., bottom tabs) */}
+      <AppNavigator />
     </NavigationContainer>
   );
 }

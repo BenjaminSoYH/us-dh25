@@ -96,10 +96,10 @@ const SignUpScreen = () => {
                     <Text style={{ fontWeight: "bold", fontSize: 30 }}>Sign up</Text>
                 </View>
                 <View style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
-                    <LoginInput placeHolder={"Enter your name"} onChange={(name: string) => { setName(name) }} />
-                    <LoginInput placeHolder={"Enter your email"} onChange={(email: string) => { setEmail(email) }} />
-                    <LoginInput placeHolder={"Enter your password"} onChange={(password: string) => { setPassword(password) }} />
-                    <LoginInput placeHolder={"Confirm your password"} onChange={(confirm: string) => { setConfirm(confirm) }} />
+                    <LoginInput display={false} placeHolder={"Enter your name"} onChange={(name: string) => { setName(name) }} />
+                    <LoginInput display={false} placeHolder={"Enter your email"} onChange={(email: string) => { setEmail(email) }} />
+                    <LoginInput display={true} placeHolder={"Enter your password"} onChange={(password: string) => { setPassword(password) }} />
+                    <LoginInput display={true} placeHolder={"Confirm your password"} onChange={(confirm: string) => { setConfirm(confirm) }} />
                 </View>
 
                 <ButtonComponent title={"Sign up"} mainColor="FF8781" textColor="FFFFFF" onPress={() => { handleSubmit() }} />

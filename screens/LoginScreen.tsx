@@ -26,7 +26,6 @@ const LoginScreen = () => {
                 const user = (await supabase.auth.getUser()).data.user
                 await upsertProfile({ handle: user?.id })
             } catch { }
-            Alert.alert('Success', 'Login successful!');
             navigation.navigate('MainScreen');
             // navigation.navigate('Home'); // Navigate to home or next screen
         } catch (e: any) {
@@ -63,8 +62,8 @@ const LoginScreen = () => {
                     <Text style={{ fontSize: 20, color: "#777777" }}>Sign in to your account via email</Text>
                 </View>
                 <View style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
-                    <LoginInput placeHolder={"Enter your email"} onChange={(email: string) => { setEmail(email) }} />
-                    <LoginInput placeHolder={"Enter your password"} onChange={(password: string) => { setPassword(password) }} />
+                    <LoginInput display={false} placeHolder={"Enter your email"} onChange={(email: string) => { setEmail(email) }} />
+                    <LoginInput display={true} placeHolder={"Enter your password"} onChange={(password: string) => { setPassword(password) }} />
                 </View>
                 <ButtonComponent title={"Sign in"} mainColor="FF8781" textColor="FFFFFF" onPress={handleSubmit} />
                 <View style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "flex-end" }}>

@@ -9,7 +9,7 @@ import { upsertProfile } from '../lib/db'
 
 const SignUpScreen = () => {
     const navigation = useNavigation<any>();
-    const[name, setName] = useState('');
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
@@ -26,7 +26,7 @@ const SignUpScreen = () => {
         if (!error) {
             try {
                 const user = (await supabase.auth.getUser()).data.user
-                await upsertProfile({ handle: user?.id })
+                await upsertProfile({ handle: user?.id, display_name: name })
             } catch { }
         } else {
             Alert.alert(error.message)
@@ -47,7 +47,7 @@ const SignUpScreen = () => {
         if (!error && session) {
             try {
                 const user = (await supabase.auth.getUser()).data.user
-                await upsertProfile({ handle: user?.id })
+                await upsertProfile({ handle: user?.id, display_name: name })
             } catch { }
         }
         if (error) Alert.alert(error.message)
@@ -96,7 +96,7 @@ const SignUpScreen = () => {
                     <Text style={{ fontWeight: "bold", fontSize: 30 }}>Sign up</Text>
                 </View>
                 <View style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
-                    <LoginInput placeHolder={"Enter your name"} onChange={(name:string) => {setName(name)}}  />
+                    <LoginInput placeHolder={"Enter your name"} onChange={(name: string) => { setName(name) }} />
                     <LoginInput placeHolder={"Enter your email"} onChange={(email: string) => { setEmail(email) }} />
                     <LoginInput placeHolder={"Enter your password"} onChange={(password: string) => { setPassword(password) }} />
                     <LoginInput placeHolder={"Confirm your password"} onChange={(confirm: string) => { setConfirm(confirm) }} />

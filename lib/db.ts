@@ -2,7 +2,7 @@
 // These expect an authenticated user; RLS enforces privacy rules.
 import { supabase } from "./supabase";
 import { z } from "zod";
-import { ZNewAnswer, ZNewJournal, ZNewPostFinalize, ZCoupleRequest, ZSendCoupleRequest, ZQuestion, ZJournal, ZJournalSummary } from "../models";
+import { ZNewAnswer, ZNewJournal, ZNewPostFinalize, ZCoupleRequest, ZSendCoupleRequest, ZQuestion, ZJournal, ZJournalSummary, ZAnswer } from "../models";
 
 // Upsert my profile row using auth.uid()
 export async function upsertProfile({ handle, display_name, avatar_url }: { handle?: string; display_name?: string; avatar_url?: string }) {
@@ -200,9 +200,32 @@ export async function getTodayQuestion() {
         .select('*')
         .eq('couple_id', couple_id)
         .eq('scheduled_for', new Date().toISOString().slice(0, 10))
-        .single();
+        .maybeSingle();
     if (error) throw error;
-    return ZQuestion.parse(data);
+    return data ? ZQuestion.parse(data) : null;
 }
 
 
+
+// Answers helpers
+export async function getAnswersForQuestion(question_id: string) {
+    const { data, error } = await supabase
+        .from('answers')
+        .select('*')
+        .eq('question_id', question_id)
+        .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data ?? []).map((a) => ZAnswer.parse(a));
+}
+
+export async function upsertMyAnswer(question_id: string, content: string) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+    const { data, error } = await supabase
+        .from('answers')
+        .upsert({ question_id, user_id: user.id, content }, { onConflict: 'question_id,user_id' })
+        .select()
+        .single();
+    if (error) throw error;
+    return ZAnswer.parse(data);
+}

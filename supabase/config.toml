@@ -1,0 +1,2 @@
+[db.migrations]
+schema_paths = ["./schema.sql"]

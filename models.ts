@@ -45,7 +45,10 @@ export type Prompt = z.infer<typeof ZPrompt>;
 // Questions attached to a question prompt
 export const ZQuestion = z.object({
     id: z.string().uuid(),
-    prompt_id: z.string().uuid(),
+    prompt_id: z.string().uuid().optional().nullable(),
+    couple_id: z.string().uuid().optional().nullable(),
+    scheduled_for: z.string().optional().nullable(),
+    created_by: z.string().uuid().optional().nullable(),
     text: z.string().min(1),
     model_source: z.string().optional().nullable(),
     created_at: z.string()
@@ -141,4 +144,24 @@ export const ZPushToken = z.object({
 });
 export type PushToken = z.infer<typeof ZPushToken>;
 
+
+
+// Couple Requests
+export const ZCoupleRequestStatus = z.enum(["pending", "accepted", "declined", "canceled", "expired"]);
+
+export const ZCoupleRequest = z.object({
+    id: z.string().uuid(),
+    requester_id: z.string().uuid(),
+    recipient_id: z.string().uuid(),
+    status: ZCoupleRequestStatus,
+    message: z.string().optional().nullable(),
+    created_at: z.string(),
+    responded_at: z.string().optional().nullable()
+});
+export type CoupleRequest = z.infer<typeof ZCoupleRequest>;
+
+export const ZSendCoupleRequest = z.object({
+    recipient_handle: z.string().min(1),
+    message: z.string().optional().nullable()
+});
 

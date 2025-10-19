@@ -60,12 +60,28 @@ create index if not exists idx_prompts_couple_time on public.prompts(couple_id, 
 -- Questions for question prompts
 create table if not exists public.questions (
   id uuid primary key default gen_random_uuid(),
-  prompt_id uuid not null references public.prompts(id) on delete cascade,
+  prompt_id uuid references public.prompts(id) on delete set null,
+  couple_id uuid references public.couples(id) on delete cascade,
+  scheduled_for date,
+  created_by uuid references public.users(id),
   text text not null,
   model_source text,
   created_at timestamptz not null default now()
 );
+-- Ensure legacy column becomes nullable if table existed
+do $$ begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='questions' and column_name='prompt_id'
+  ) then
+    begin
+      execute 'alter table public.questions alter column prompt_id drop not null';
+    exception when others then null; end;
+  end if;
+end $$;
 create index if not exists idx_questions_prompt_id on public.questions(prompt_id);
+create index if not exists idx_questions_couple_day on public.questions(couple_id, scheduled_for);
+create unique index if not exists uniq_question_per_couple_day on public.questions(couple_id, scheduled_for) where scheduled_for is not null;
 
 -- Answers (unique per question/user)
 create table if not exists public.answers (
@@ -190,20 +206,27 @@ create policy prompts_member_select on public.prompts for select using (public.i
 create policy prompts_member_insert on public.prompts for insert with check (public.is_couple_member(couple_id));
 
 -- Questions: member read/insert via prompt->couple
+do $$ begin
+  -- Drop old prompt-based policies if present
+  begin execute 'drop policy questions_member_select on public.questions'; exception when undefined_object then null; end;
+  begin execute 'drop policy questions_member_insert on public.questions'; exception when undefined_object then null; end;
+end $$;
 create policy questions_member_select on public.questions for select using (
-  public.is_couple_member((select couple_id from public.prompts p where p.id = prompt_id))
+  public.is_couple_member(couple_id)
 );
 create policy questions_member_insert on public.questions for insert with check (
-  public.is_couple_member((select couple_id from public.prompts p where p.id = prompt_id))
+  public.is_couple_member(couple_id)
 );
 
 -- Answers: owner RW; partner read via couple
 create policy answers_owner_rw on public.answers for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+do $$ begin
+  begin execute 'drop policy answers_partner_select on public.answers'; exception when undefined_object then null; end;
+end $$;
 create policy answers_partner_select on public.answers for select using (
   exists (
     select 1 from public.questions q
-    join public.prompts p on p.id = q.prompt_id
-    join public.couple_members cm on cm.couple_id = p.couple_id
+    join public.couple_members cm on cm.couple_id = q.couple_id
     where q.id = answers.question_id and cm.user_id = auth.uid()
   )
 );
@@ -240,15 +263,174 @@ create policy push_owner_rw on public.push_tokens for all using (user_id = auth.
 create policy notif_owner_read on public.notifications for select using (user_id = auth.uid());
 
 -- Helpful views
-create or replace view public.v_active_prompt as
-select distinct on (p.couple_id) p.* from public.prompts p order by p.couple_id, p.scheduled_at desc;
+create or replace view public.v_today_question as
+select q.* from public.questions q
+where q.scheduled_for = now()::date;
 
-create or replace view public.v_feed_today as
-select po.id as post_id, po.couple_id, po.prompt_id, po.user_id, po.image_url, po.is_late, po.created_at,
-       u.display_name, u.handle, u.avatar_url
-from public.posts po
-join public.users u on u.id = po.user_id
-join public.prompts pr on pr.id = po.prompt_id
-where pr.scheduled_at::date = now()::date;
 
+-- Couples: Requests system
+do $$ begin
+  perform 1 from pg_type where typname = 'couple_request_status';
+  if not found then create type couple_request_status as enum ('pending','accepted','declined','canceled','expired'); end if;
+end $$;
+
+create table if not exists public.couple_requests (
+  id uuid primary key default gen_random_uuid(),
+  requester_id uuid not null references public.users(id) on delete cascade,
+  recipient_id uuid not null references public.users(id) on delete cascade,
+  status couple_request_status not null default 'pending',
+  message text,
+  created_at timestamptz not null default now(),
+  responded_at timestamptz
+);
+
+-- One active couple per user
+do $$ begin
+  perform 1 from pg_indexes where schemaname = 'public' and indexname = 'uniq_member_one_couple';
+  if not found then execute 'create unique index uniq_member_one_couple on public.couple_members(user_id)'; end if;
+end $$;
+
+-- Prevent duplicate pending requests between same pair (order-insensitive)
+do $$ begin
+  perform 1 from pg_indexes where schemaname = 'public' and indexname = 'uniq_pending_pair';
+  if not found then execute $cr$
+    create unique index uniq_pending_pair
+    on public.couple_requests (
+      (least(requester_id, recipient_id)),
+      (greatest(requester_id, recipient_id))
+    ) where status = 'pending'$cr$; end if;
+end $$;
+
+-- RLS for couple_requests
+alter table public.couple_requests enable row level security;
+create policy cr_select_involved on public.couple_requests for select using (
+  requester_id = auth.uid() or recipient_id = auth.uid()
+);
+create policy cr_insert_requester on public.couple_requests for insert with check (
+  requester_id = auth.uid()
+);
+-- Intentionally no generic update/delete policy; transitions via RPC only
+
+-- RPC: send request by recipient handle
+create or replace function public.send_couple_request(recipient_handle text, msg text default null)
+returns public.couple_requests
+language plpgsql
+security definer
+set search_path = public as $$
+declare
+  me uuid := auth.uid();
+  recip public.users%rowtype;
+  existing_couple_me uuid;
+  existing_couple_them uuid;
+  req public.couple_requests%rowtype;
+begin
+  if me is null then
+    raise exception 'not authenticated';
+  end if;
+  select * into recip from public.users where handle = recipient_handle;
+  if recip.id is null then
+    raise exception 'recipient not found';
+  end if;
+  if recip.id = me then
+    raise exception 'cannot send request to yourself';
+  end if;
+  select couple_id into existing_couple_me from public.couple_members where user_id = me;
+  select couple_id into existing_couple_them from public.couple_members where user_id = recip.id;
+  if existing_couple_me is not null then
+    raise exception 'you are already in a couple';
+  end if;
+  if existing_couple_them is not null then
+    raise exception 'recipient is already in a couple';
+  end if;
+  insert into public.couple_requests (requester_id, recipient_id, message)
+  values (me, recip.id, msg)
+  returning * into req;
+
+  -- optional: notify recipient
+  insert into public.notifications (user_id, title, body)
+  values (recip.id, 'Couple Request', 'You received a couple request');
+
+  return req;
+exception when unique_violation then
+  raise exception 'a pending request already exists between you two';
+end;
+$$;
+
+-- RPC: accept request (recipient only)
+create or replace function public.accept_couple_request(request_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = public as $$
+declare
+  me uuid := auth.uid();
+  r public.couple_requests%rowtype;
+  cid uuid;
+  requester_name text;
+  recipient_name text;
+begin
+  if me is null then
+    raise exception 'not authenticated';
+  end if;
+  select * into r from public.couple_requests where id = request_id for update;
+  if r.id is null then raise exception 'request not found'; end if;
+  if r.status <> 'pending' then raise exception 'request not pending'; end if;
+  if r.recipient_id <> me then raise exception 'only recipient can accept'; end if;
+
+  -- ensure neither side is already in a couple
+  if exists (select 1 from public.couple_members where user_id in (r.requester_id, r.recipient_id)) then
+    raise exception 'one or both users already in a couple';
+  end if;
+
+  select coalesce(display_name, handle) into requester_name from public.users where id = r.requester_id;
+  select coalesce(display_name, handle) into recipient_name from public.users where id = r.recipient_id;
+  insert into public.couples (name) values (trim(both from (requester_name || ' × ' || recipient_name))) returning id into cid;
+  insert into public.couple_members (couple_id, user_id, role) values (cid, r.requester_id, 'partner');
+  insert into public.couple_members (couple_id, user_id, role) values (cid, r.recipient_id, 'partner');
+
+  update public.couple_requests set status = 'accepted', responded_at = now() where id = r.id;
+
+  -- optional: notify both
+  insert into public.notifications (user_id, title, body) values (r.requester_id, 'Couple Request Accepted', 'You are now in a couple');
+  insert into public.notifications (user_id, title, body) values (r.recipient_id, 'Couple Request Accepted', 'You are now in a couple');
+
+  return cid;
+end;
+$$;
+
+-- RPC: decline (recipient only)
+create or replace function public.decline_couple_request(request_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public as $$
+declare
+  me uuid := auth.uid();
+  r public.couple_requests%rowtype;
+begin
+  select * into r from public.couple_requests where id = request_id for update;
+  if r.id is null then raise exception 'request not found'; end if;
+  if r.status <> 'pending' then raise exception 'request not pending'; end if;
+  if r.recipient_id <> me then raise exception 'only recipient can decline'; end if;
+  update public.couple_requests set status = 'declined', responded_at = now() where id = r.id;
+end;
+$$;
+
+-- RPC: cancel (requester only)
+create or replace function public.cancel_couple_request(request_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public as $$
+declare
+  me uuid := auth.uid();
+  r public.couple_requests%rowtype;
+begin
+  select * into r from public.couple_requests where id = request_id for update;
+  if r.id is null then raise exception 'request not found'; end if;
+  if r.status <> 'pending' then raise exception 'request not pending'; end if;
+  if r.requester_id <> me then raise exception 'only requester can cancel'; end if;
+  update public.couple_requests set status = 'canceled', responded_at = now() where id = r.id;
+end;
+$$;
 

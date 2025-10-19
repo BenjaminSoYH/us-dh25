@@ -1,6 +1,6 @@
 // @ts-nocheck
-// deno-lint-ignore-file no-explicit-anyimport 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-
+// deno-lint-ignore-file no-explicit-any
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.10'
 
 // Helper to build a Supabase client bound to the caller's JWT (RLS enforced)

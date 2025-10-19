@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './navigation/AppNavigator';
+import JournalScreen from './screens/JournalScreen';
 import { useFonts } from "expo-font";
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import { useEffect } from "react";
@@ -25,8 +26,8 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      {/* AppNavigator should contain your tab/stack setup (e.g., bottom tabs) */}
-      <AppNavigator />
+      {/* TEMP: expose Journal screen directly for testing */}
+      <JournalScreen />
     </NavigationContainer>
   );
 }

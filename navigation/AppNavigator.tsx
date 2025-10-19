@@ -32,14 +32,14 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="CoupleGate" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen}/>
         <Stack.Screen name="SignUpScreen" component={SignUpScreen}/>
         <Stack.Screen name="QuestionScreen" component={QuestionScreen} />
       {/*<Stack.Screen name="SignIn" component={SignInScreen} />*/}
       {/*<Stack.Screen name="Home" component={HomeScreen} />*/}
-      {/*<Stack.Screen name="CoupleGate" component={CoupleGateScreen} />*/}
+      <Stack.Screen name="CoupleGate" component={CoupleGateScreen} />
       {/*<Stack.Screen name="CreateCouple" component={CreateCouplePlaceholder} />*/}
       {/*<Stack.Screen name="JoinCouple" component={JoinCouplePlaceholder} />*/}
     </Stack.Navigator>

@@ -51,14 +51,14 @@ export default function CoupleGateScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f172a' },
+  safe: { flex: 1, backgroundColor: '#FFFFFF' },
   container: { flex: 1, padding: 20, justifyContent: 'center' },
   header: { marginBottom: 24, alignItems: 'center' },
-  title: { fontSize: 28, fontWeight: '800', color: 'white' },
+  title: { fontSize: 28, fontWeight: '800', color: '#111827' },
   subtitle: {
     marginTop: 8,
     fontSize: 14,
-    color: '#cbd5e1',
+    color: '#111827',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -69,15 +69,16 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.12,
     shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
+    borderColor:'#111827',
   },
   primaryBtn: {
     height: 52,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#111827',
+    backgroundColor: '#FF8781',
   },
   primaryText: { color: 'white', fontWeight: '700', fontSize: 16 },
   secondaryBtn: {
@@ -85,11 +86,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#111827',
-    backgroundColor: 'white',
+    backgroundColor: '#95B88F',
   },
-  secondaryText: { color: '#111827', fontWeight: '700', fontSize: 16 },
+  secondaryText: { color: 'white', fontWeight: '700', fontSize: 16 },
   footer: { marginTop: 18, alignItems: 'center', paddingHorizontal: 8 },
-  footerText: { color: '#94a3b8', fontSize: 12, textAlign: 'center' },
+  footerText: { color: '#111827', fontSize: 12, textAlign: 'center' },
 });

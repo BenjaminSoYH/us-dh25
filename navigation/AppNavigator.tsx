@@ -1,21 +1,22 @@
+// navigation/AppNavigator.tsx
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignInScreen from '../screens/LoginAndRegisterScreen';
-import { View, Text } from 'react-native';
+import CoupleGateScreen from '../screens/CoupleGateScreen';
 
-// TEMP placeholder so navigation.navigate('CoupleGate') won't crash.
-// We'll replace this with the real pairing flow later.
-function CoupleGateScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>CoupleGate (placeholder)</Text>
-    </View>
-  );
-}
+const CreateCouplePlaceholder = () => (
+  <></>
+);
+const JoinCouplePlaceholder = () => (
+  <></>
+);
+
 
 export type RootStackParamList = {
   SignIn: undefined;
   CoupleGate: undefined;
+  CreateCouple: undefined;
+  JoinCouple: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,6 +26,8 @@ export default function AppNavigator() {
     <Stack.Navigator initialRouteName="SignIn" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="CoupleGate" component={CoupleGateScreen} />
+      <Stack.Screen name="CreateCouple" component={CreateCouplePlaceholder} />
+      <Stack.Screen name="JoinCouple" component={JoinCouplePlaceholder} />
     </Stack.Navigator>
   );
 }

@@ -21,6 +21,7 @@ export type RootStackParamList = {
     LoginScreen: undefined;
     SignUpScreen: undefined;
     QuestionScreen: undefined;
+    PairingScreen: undefined;
     // Pass the user's name as a route param
     MainScreen: { name: string } | undefined;
 };

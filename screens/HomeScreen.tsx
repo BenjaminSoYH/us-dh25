@@ -10,7 +10,7 @@ export default function HomeScreen({ navigation, route }: any) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.greeting}>hellom {name}...</Text>
+      <Text style={styles.greeting}>hello {name}...</Text>
       <Text style={styles.title}>Home Screen</Text>
 
       <StreakNumber value={6} fontSize={30} fireFontSize={64} />

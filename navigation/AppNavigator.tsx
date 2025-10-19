@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignInScreen from '../screens/LoginAndRegisterScreen';
+import HomeScreen from '../screens/HomeScreen';
 import { View, Text } from 'react-native';
 
 // TEMP placeholder so navigation.navigate('CoupleGate') won't crash.
@@ -15,6 +16,7 @@ function CoupleGateScreen() {
 
 export type RootStackParamList = {
   SignIn: undefined;
+  Home: undefined;
   CoupleGate: undefined;
 };
 
@@ -22,8 +24,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator initialRouteName="SignIn" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="CoupleGate" component={CoupleGateScreen} />
     </Stack.Navigator>
   );

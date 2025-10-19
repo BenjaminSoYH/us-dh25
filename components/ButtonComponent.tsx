@@ -1,9 +1,9 @@
 import React, {useState} from 'react'
 import {TouchableOpacity, Text, StyleSheet} from "react-native";
 
-const ButtonComponent = ({title, mainColor, textColor}: { title: string, mainColor: string, textColor: string }) => {
+const ButtonComponent = ({title, mainColor, textColor, onPress}: { title: string, mainColor: string, textColor: string, onPress: any}) => {
     return (
-        <TouchableOpacity style={[styles.button, {backgroundColor: `#${mainColor}`}]}>
+        <TouchableOpacity style={[styles.button, {backgroundColor: `#${mainColor}`}]} onPress={() => {onPress()}}>
             <Text style={[styles.text, {color: `#${textColor}`}]}>{title}</Text>
         </TouchableOpacity>
     )
@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+        width:"100%",
     },
     text: {
         fontSize: 16,

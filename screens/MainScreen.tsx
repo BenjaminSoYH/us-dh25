@@ -73,7 +73,7 @@ export default function MainScreen({ route }: Props) {
                     </View>
                 </View>
             </View>
-            <Navbar disabled />
+            <Navbar />
         </View>
     );
 }
@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         paddingBottom: 90,
         alignItems: "center", // Centers everything
-        backgroundColor: 'white'
     },
 
     content: {

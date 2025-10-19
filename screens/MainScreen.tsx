@@ -26,7 +26,10 @@ export default function MainScreen({ route }: Props) {
 
                 <View style={{width:"100%", display: "flex", justifyContent:"flex-start"}}>
                     <Text style={{fontSize:35, fontWeight:"bold"}}>{getGreeting()}, {name}!</Text>
-                    <View></View>
+                    <View>
+
+
+                    </View>
 
                     <View>
                         <ProgressBar progress={100}/>

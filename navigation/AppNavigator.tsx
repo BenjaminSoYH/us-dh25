@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import SplashScreen from "../screens/SplashScreen";
 import LoginScreen from "../screens/LoginScreen";
 import SignUpScreen from "../screens/SignUpScreen";
+import QuestionScreen from '../screens/QuestionScreen';
 
 const CreateCouplePlaceholder = () => (
   <></>
@@ -15,9 +16,8 @@ const JoinCouplePlaceholder = () => (
   <></>
 );
 
-
 export type RootStackParamList = {
-    SplashScreen: undefined;
+  SplashScreen: undefined;
   SignIn: undefined;
   Home: undefined;
   CoupleGate: undefined;
@@ -25,6 +25,7 @@ export type RootStackParamList = {
   JoinCouple: undefined;
   LoginScreen: undefined;
   SignUpScreen: undefined;
+  QuestionScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,6 +36,7 @@ export default function AppNavigator() {
         <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen}/>
         <Stack.Screen name="SignUpScreen" component={SignUpScreen}/>
+        <Stack.Screen name="QuestionScreen" component={QuestionScreen} />
       {/*<Stack.Screen name="SignIn" component={SignInScreen} />*/}
       {/*<Stack.Screen name="Home" component={HomeScreen} />*/}
       {/*<Stack.Screen name="CoupleGate" component={CoupleGateScreen} />*/}

@@ -5,6 +5,7 @@ import SplashScreen from "../screens/SplashScreen";
 import LoginScreen from "../screens/LoginScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import QuestionScreen from '../screens/QuestionScreen';
+import PairingScreen from '../screens/PairingScreen';
 import MainScreen from "../screens/MainScreen";
 
 const CreateCouplePlaceholder = () => <></>;
@@ -33,6 +34,7 @@ export default function AppNavigator() {
             <Stack.Screen name="LoginScreen" component={LoginScreen}/>
             <Stack.Screen name="SignUpScreen" component={SignUpScreen}/>
             <Stack.Screen name="QuestionScreen" component={QuestionScreen} />
+            <Stack.Screen name="PairingScreen" component={PairingScreen} />
             {/* Provide an optional default with initialParams if desired */}
             <Stack.Screen
                 name="MainScreen"

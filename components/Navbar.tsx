@@ -25,7 +25,7 @@ export default function Navbar({ disabled = false }: { disabled?: boolean }) {
   const tabs = [
     { key: "QuestionScreen", label: "Questions", Icon: BookOpenIcon, size: 26 },
     { key: "MainScreen", label: "Home", Icon: HomeIcon, size: 32 },
-    { key: "JournalsScreen", label: "Journals", Icon: PencilSquareIcon, size: 26 },
+    { key: "JournalScreen", label: "Journals", Icon: PencilSquareIcon, size: 26 },
   ];
 
   return (

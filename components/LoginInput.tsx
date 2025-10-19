@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {StyleSheet, TextInput, View} from "react-native";
 
-const LoginInput = ({placeHolder, onChange} :{placeHolder: string, onChange: any}) => {
+const LoginInput = ({placeHolder, onChange, display} :{placeHolder: string, onChange: any, display: boolean}) => {
     const [value, setValue] = useState<string>('');
 
     const handleChange = (input:string) => {
@@ -19,6 +19,7 @@ const LoginInput = ({placeHolder, onChange} :{placeHolder: string, onChange: any
                 onChangeText={handleChange}
                 autoCapitalize="none"
                 autoCorrect={false}
+                secureTextEntry={display}
             />
         </View>
     )

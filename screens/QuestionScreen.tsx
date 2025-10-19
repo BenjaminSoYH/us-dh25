@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { getTodayQuestion, getAnswersForQuestion, upsertMyAnswer } from "../lib/db";
 import { supabase } from "../lib/supabase";
+import Navbar from '../components/Navbar';
 
 export default function QuestionScreen({ questionText = undefined as string | undefined }) {
   const [isFocused, setIsFocused] = useState(false);
@@ -141,6 +142,7 @@ export default function QuestionScreen({ questionText = undefined as string | un
             )}
           </>
         )}
+        <Navbar />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -161,6 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    paddingBottom: 90,
   },
   card: {
     width: '100%',

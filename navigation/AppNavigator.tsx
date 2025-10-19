@@ -7,9 +7,11 @@ import SignUpScreen from "../screens/SignUpScreen";
 import QuestionScreen from '../screens/QuestionScreen';
 import PairingScreen from '../screens/PairingScreen';
 import MainScreen from "../screens/MainScreen";
+import JournalScreen from '../screens/JournalScreen';
 
 const CreateCouplePlaceholder = () => <></>;
 const JoinCouplePlaceholder = () => <></>;
+const JournalsPlaceholder = () => <></>;
 
 export type RootStackParamList = {
     SplashScreen: undefined;
@@ -22,6 +24,7 @@ export type RootStackParamList = {
     SignUpScreen: undefined;
     QuestionScreen: undefined;
     PairingScreen: undefined;
+    JournalScreen: undefined;
     // Pass the user's name as a route param
     MainScreen: { name: string } | undefined;
 };
@@ -30,12 +33,13 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
     return (
-        <Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="QuestionScreen" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="SplashScreen" component={SplashScreen} />
             <Stack.Screen name="LoginScreen" component={LoginScreen}/>
             <Stack.Screen name="SignUpScreen" component={SignUpScreen}/>
             <Stack.Screen name="QuestionScreen" component={QuestionScreen} />
             <Stack.Screen name="PairingScreen" component={PairingScreen} />
+            <Stack.Screen name="JournalScreen" component={JournalScreen} />
             {/* Provide an optional default with initialParams if desired */}
             <Stack.Screen
                 name="MainScreen"

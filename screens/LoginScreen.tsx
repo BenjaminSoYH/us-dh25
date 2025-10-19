@@ -26,7 +26,8 @@ const LoginScreen = () => {
                 const user = (await supabase.auth.getUser()).data.user
                 await upsertProfile({ handle: user?.id })
             } catch { }
-            Alert.alert('Success', 'Login successful!')
+            Alert.alert('Success', 'Login successful!');
+            navigation.navigate('MainScreen');
             // navigation.navigate('Home'); // Navigate to home or next screen
         } catch (e: any) {
             Alert.alert('Error', String(e?.message ?? e))

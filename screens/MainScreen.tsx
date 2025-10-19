@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import ProgressBar from "../components/ProgressBar";
+import Navbar from "../components/Navbar";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'MainScreen'>;
 
@@ -41,6 +42,7 @@ export default function MainScreen({ route }: Props) {
                 </View>
             </View>
             {/* rest of your UI */}
+            <Navbar disabled />
         </View>
     );
 }
@@ -50,6 +52,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 100,
         paddingHorizontal: 30,
+        paddingBottom: 90,
         alignItems: "center", // Centers everything
         backgroundColor: 'white'
     },

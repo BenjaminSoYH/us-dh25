@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Alert
 } from 'react-native';
+import Navbar from '../components/Navbar';
 
 export default function QuestionScreen({ questionText = 'What assumption did you make about me that turned out to be false?' }) {
   const [isFocused, setIsFocused] = useState(false);
@@ -55,6 +56,7 @@ export default function QuestionScreen({ questionText = 'What assumption did you
         >
           <Text style={styles.submitButtonText}>Submit</Text>
         </TouchableOpacity>
+        <Navbar />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -75,6 +77,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    paddingBottom: 90,
   },
   card: {
     width: '100%',

@@ -1,5 +1,5 @@
-import React from 'react'
-import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import React, {useState} from 'react'
+import {Alert, Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import LoginInput from "../components/LoginInput";
 import ButtonComponent from "../components/ButtonComponent";
 import {ArrowLeftIcon} from "react-native-heroicons/solid";
@@ -7,6 +7,44 @@ import {useNavigation} from "@react-navigation/native";
 
 const SignUpScreen = () => {
     const navigation = useNavigation<any>();
+    const[email, setEmail] = useState('');
+    const[password, setPassword] = useState('');
+    const[confirm, setConfirm] = useState('');
+
+
+    const handleSubmit = () => {
+        if (!validate()) return;  // Added: Call validate and exit if it fails
+
+        // If email already exist in the database, don't let them create a new account
+
+        // If validation passes, proceed with login
+        Alert.alert('Success', 'Login successful!');
+
+        // navigation.navigate('Home'); // Navigate to home or next screen
+    };
+
+    const validate = () => {
+        if (!email.trim() || !password.trim()) {
+            Alert.alert('Missing info', 'Please enter your email and password.');
+            return false;
+        }
+
+        if (!email.includes('@')) {
+            Alert.alert('Invalid email', 'Please enter a valid email.');
+            return false;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Weak password', 'Password should be at least 6 characters.');
+            return false;
+        }
+
+        if (password !== confirm) {
+            Alert.alert('Passwords do not match', 'Please confirm your password.');
+            return false;
+        }
+    }
+
     return (
         <View style={styles.screen}>
             <View style={styles.content}>
@@ -16,14 +54,15 @@ const SignUpScreen = () => {
                         source={require('../assets/BloomLogo.png')}
                         resizeMode="contain"
                     />
-                    <Text style={{fontWeight:"bold", fontSize: 20}}>Sign up</Text>
-                    <Text style={{fontSize: 20, color: "#777777"}}>Sign in to your account via email</Text>
+                    <Text style={{fontWeight:"bold", fontSize: 30}}>Sign up</Text>
                 </View>
                 <View style={{width: "100%", display:"flex", flexDirection:"column", gap: 10}}>
-                    <LoginInput placeHolder={"Enter your email"} onChange={undefined}  />
-                    <LoginInput placeHolder={"Enter your password"} onChange={undefined}/>
+                    <LoginInput placeHolder={"Enter your email"} onChange={(email:string) => {setEmail(email)}}  />
+                    <LoginInput placeHolder={"Enter your password"} onChange={(password:string) => {setPassword(password)}}/>
+                    <LoginInput placeHolder={"Confirm your password"} onChange={(confirm:string) => {setConfirm(confirm)}}/>
                 </View>
-                <ButtonComponent title={"Sign in"} mainColor="FF8781" textColor="FFFFFF" onPress={undefined}/>
+
+                <ButtonComponent title={"Sign up"} mainColor="FF8781" textColor="FFFFFF" onPress={() => {handleSubmit()}}/>
                 <View style={{width:"100%", display:"flex", flexDirection:"row", justifyContent:"flex-end"}}>
                     <TouchableOpacity style={{display:"flex", flexDirection:"row", gap: 10, alignItems:"center"}} onPress={() => {navigation.navigate('SplashScreen')}}>
                         <ArrowLeftIcon></ArrowLeftIcon>

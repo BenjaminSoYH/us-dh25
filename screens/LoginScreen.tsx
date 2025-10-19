@@ -9,8 +9,6 @@ const LoginScreen = () => {
     const navigation = useNavigation<any>();
     const[email, setEmail] = useState('');
     const[password, setPassword] = useState('');
-    const[confirmPass, setConfirmPass] = useState('');
-    const[mode, setMode] = useState()
 
     // Define a method that handleSubmit
     const handleSubmit = () => {

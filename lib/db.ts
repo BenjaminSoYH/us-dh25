@@ -8,8 +8,15 @@ import { ZNewAnswer, ZNewJournal, ZNewPostFinalize } from "../models";
 export async function upsertProfile({ handle, display_name, avatar_url }: { handle?: string; display_name?: string; avatar_url?: string }) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
-    const { error } = await supabase.from("users").upsert({ id: user.id, handle, display_name, avatar_url });
+    // Default handle to the authenticated user UUID to guarantee uniqueness and linkage
+    const effectiveHandle = handle ?? user.id;
+    const { data, error } = await supabase
+        .from("users")
+        .upsert({ id: user.id, handle: effectiveHandle, display_name, avatar_url })
+        .select()
+        .single();
     if (error) throw error;
+    return data;
 }
 
 // Resolve my couple_id via membership

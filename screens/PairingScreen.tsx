@@ -11,8 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 
-export default function CoupleGateScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'CoupleGate'>>();
+export default function PairingScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'PairingScreen'>>();
 
   return (
     <SafeAreaView style={styles.safe}>

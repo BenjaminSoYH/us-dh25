@@ -27,7 +27,7 @@ export default function App() {
   return (
     <NavigationContainer>
       {/* TEMP: expose Journal screen directly for testing */}
-      <JournalScreen />
+      <AppNavigator />
     </NavigationContainer>
   );
 }

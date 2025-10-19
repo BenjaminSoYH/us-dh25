@@ -95,16 +95,51 @@ create table if not exists public.answers (
 );
 create index if not exists idx_answers_question_user on public.answers(question_id, user_id);
 
--- Journals (private/partner visibility)
 create table if not exists public.journals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users(id) on delete cascade,
+  title text,
   content text not null,
   ai_summary text,
   visibility journal_visibility not null default 'private',
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 create index if not exists idx_journals_user_time on public.journals(user_id, created_at desc);
+
+-- Ensure updated_at bumps on content/title/visibility changes
+do $$ begin
+  perform 1 from pg_proc where proname = 'journals_set_updated_at';
+  if not found then
+    create or replace function public.journals_set_updated_at()
+    returns trigger language plpgsql as $$
+    begin
+      new.updated_at := now();
+      return new;
+    end;
+    $$;
+  end if;
+exception when others then null; end $$;
+
+do $$ begin
+  perform 1 from pg_trigger where tgname = 'tr_journals_set_updated_at';
+  if not found then
+    create trigger tr_journals_set_updated_at
+    before update on public.journals
+    for each row execute procedure public.journals_set_updated_at();
+  end if;
+exception when others then null; end $$;
+
+-- Summaries for partner sharing (append history)
+create table if not exists public.journal_summaries (
+  id uuid primary key default gen_random_uuid(),
+  journal_id uuid not null references public.journals(id) on delete cascade,
+  generated_by uuid references public.users(id),
+  summary text not null,
+  model text,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_journal_summaries_journal on public.journal_summaries(journal_id, created_at desc);
 
 -- Stitched post for photo prompt
 create table if not exists public.posts (
@@ -238,6 +273,26 @@ create policy journals_partner_read_if_shared on public.journals for select usin
     select 1 from public.couple_members cm1
     join public.couple_members cm2 on cm1.couple_id = cm2.couple_id
     where cm1.user_id = journals.user_id and cm2.user_id = auth.uid()
+  )
+);
+
+-- Journal summaries: partner can read if the parent is shared; owner RW
+alter table public.journal_summaries enable row level security;
+create policy js_owner_rw on public.journal_summaries for all using (
+  exists (
+    select 1 from public.journals j where j.id = journal_summaries.journal_id and j.user_id = auth.uid()
+  )
+) with check (
+  exists (
+    select 1 from public.journals j where j.id = journal_summaries.journal_id and j.user_id = auth.uid()
+  )
+);
+create policy js_partner_read_if_shared on public.journal_summaries for select using (
+  exists (
+    select 1 from public.journals j
+    join public.couple_members cm1 on cm1.user_id = j.user_id
+    join public.couple_members cm2 on cm2.couple_id = cm1.couple_id and cm2.user_id = auth.uid()
+    where j.id = journal_summaries.journal_id and j.visibility = 'partner'
   )
 );
 

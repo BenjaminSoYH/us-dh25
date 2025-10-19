@@ -2,7 +2,7 @@
 // These expect an authenticated user; RLS enforces privacy rules.
 import { supabase } from "./supabase";
 import { z } from "zod";
-import { ZNewAnswer, ZNewJournal, ZNewPostFinalize, ZCoupleRequest, ZSendCoupleRequest, ZQuestion } from "../models";
+import { ZNewAnswer, ZNewJournal, ZNewPostFinalize, ZCoupleRequest, ZSendCoupleRequest, ZQuestion, ZJournal, ZJournalSummary } from "../models";
 
 // Upsert my profile row using auth.uid()
 export async function upsertProfile({ handle, display_name, avatar_url }: { handle?: string; display_name?: string; avatar_url?: string }) {
@@ -63,7 +63,66 @@ export async function newJournal(payload: z.infer<typeof ZNewJournal>) {
     const { data: { user } } = await supabase.auth.getUser();
     const { data, error } = await supabase.from("journals").insert({ ...parsed, user_id: user!.id }).select().single();
     if (error) throw error;
-    return data;
+    return ZJournal.parse(data);
+}
+
+export async function listMyJournals() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+    const { data, error } = await supabase
+        .from('journals')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((j) => ZJournal.parse(j));
+}
+
+export async function getJournal(journal_id: string) {
+    const { data, error } = await supabase.from('journals').select('*').eq('id', journal_id).single();
+    if (error) throw error;
+    return ZJournal.parse(data);
+}
+
+export async function updateJournal(journal_id: string, changes: Partial<Pick<z.infer<typeof ZNewJournal>, 'title' | 'content' | 'visibility'>>) {
+    const { data, error } = await supabase
+        .from('journals')
+        .update(changes)
+        .eq('id', journal_id)
+        .select()
+        .single();
+    if (error) throw error;
+    return ZJournal.parse(data);
+}
+
+export async function deleteJournal(journal_id: string) {
+    const { error } = await supabase.from('journals').delete().eq('id', journal_id);
+    if (error) throw error;
+}
+
+export async function listJournalSummaries(journal_id: string) {
+    const { data, error } = await supabase
+        .from('journal_summaries')
+        .select('*')
+        .eq('journal_id', journal_id)
+        .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((s) => ZJournalSummary.parse(s));
+}
+
+// Trigger OpenAI summarization via Edge Function
+export async function summarizeJournal(journal_id: string) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(`${process.env.EXPO_PUBLIC_EDGE_URL}/journal-summarize`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {})
+        },
+        body: JSON.stringify({ kind: 'journal_summary', journal_id })
+    });
+    if (!res.ok) throw new Error(`Summarize failed: ${res.status}`);
+    return res.json();
 }
 
 // Ask server to finalize stitched photo and insert post (Edge Function)

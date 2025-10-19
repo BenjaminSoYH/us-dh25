@@ -12,7 +12,6 @@ const JoinCouplePlaceholder = () => (
   <></>
 );
 
-
 export type RootStackParamList = {
   SignIn: undefined;
   Home: undefined;
@@ -31,6 +30,7 @@ export default function AppNavigator() {
       <Stack.Screen name="CoupleGate" component={CoupleGateScreen} />
       <Stack.Screen name="CreateCouple" component={CreateCouplePlaceholder} />
       <Stack.Screen name="JoinCouple" component={JoinCouplePlaceholder} />
+      <Stack.Screen name="DailyQuestion" component={QuestionScreen} />
     </Stack.Navigator>
   );
 }
